@@ -75,6 +75,8 @@ Implemented comprehensive data models for the application:
 - `KidGuardCore/Services/ScreenshotService.swift`
 - `KidGuardCore/Services/StorageService.swift`
 - `KidGuardCore/Services/SubscriptionService.swift`
+- `KidGuardCore/Services/ProxyService.swift`
+- `KidGuardCore/Resources/KidGuardAI.xcdatamodeld/` - Core Data schema
 
 ### 4. SwiftUI User Interface
 **Status: Complete**
@@ -177,24 +179,37 @@ Implemented comprehensive data models for the application:
 - ⚠️ Performance optimization for real-time analysis
 
 ### 2. Core Data Storage
-**Status: Service Layer Complete, Persistence Partial**
+**Status: Complete**
 
 - ✅ Service interfaces and models
 - ✅ Encryption and security framework
-- ⚠️ Core Data schema file (.xcdatamodeld) needed
-- ⚠️ Migration handling for schema updates
-- ⚠️ Data export/import functionality
+- ✅ Core Data schema file (.xcdatamodeld) created with RuleEntity and EventEntity
+- ✅ Entity fetch request methods implemented
+- ✅ Bundle resource loading configured in Package.swift
+- ⚠️ Migration handling for schema updates (future enhancement)
+- ⚠️ Data export/import functionality (future enhancement)
+
+### 3. HTTP Proxy Service
+**Status: Complete (Container-ready)**
+
+- ✅ HTTP proxy server implementation with socket-based networking
+- ✅ API endpoints for health checks, rules, and content analysis
+- ✅ Integration with LLM service for content analysis
+- ✅ Event logging and storage integration
+- ✅ CONNECT method support for HTTPS tunneling
+- ⚠️ Network Extension for system-wide macOS proxy (future enhancement)
+- ⚠️ HTTPS certificate generation and installation (future enhancement)
 
 ## ⏳ Not Yet Implemented
 
-### 1. Network Proxy Module
-**Priority: High**
+### 1. macOS Network Extension
+**Priority: Medium**
 
-The system-wide web traffic monitoring requires:
+For native system-wide web traffic monitoring:
 - **Network Extension** implementation for macOS
 - **HTTPS certificate** generation and installation
-- **Traffic interception** and analysis pipeline
-- **Content filtering** based on AI analysis results
+- **System proxy** configuration automation
+- **Transparent traffic interception**
 
 ### 2. Cloud Storage Integration
 **Priority: Medium**
@@ -275,10 +290,11 @@ curl -X POST http://localhost:8080/api/rules \
 ## 🎯 Next Development Priorities
 
 ### Phase 1: Core Functionality (Weeks 1-2)
-1. **Complete proxy service** implementation in container
-2. **Test AI rule parsing** and content analysis
-3. **Implement screenshot analysis** pipeline
-4. **Add API endpoints** for rule and event management
+1. ✅ ~~**Complete proxy service** implementation in container~~
+2. ✅ ~~**Core Data persistence layer** with schema and entities~~
+3. **Test AI rule parsing** and content analysis with real Ollama models
+4. **Implement screenshot analysis** pipeline end-to-end testing
+5. **Test API endpoints** for rule and event management in container
 
 ### Phase 2: macOS Integration (Weeks 3-4)  
 1. **Network Extension** for system-wide proxy

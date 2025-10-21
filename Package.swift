@@ -37,7 +37,10 @@ let package = Package(
                 "Alamofire",
                 .product(name: "RevenueCat", package: "purchases-ios")
             ],
-            path: "KidGuardCore"
+            path: "KidGuardCore",
+            resources: [
+                .process("Resources/KidGuardAI.xcdatamodeld")
+            ]
         ),
         .testTarget(
             name: "KidGuardAITests",
