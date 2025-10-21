@@ -147,34 +147,7 @@ class MonitoringDaemon {
     }
 }
 
-// Simple proxy service implementation
-class ProxyService {
-    private let llmService: LLMService
-    private let storageService: StorageService
-    private var server: HTTPServer?
-    
-    init(llmService: LLMService, storageService: StorageService) {
-        self.llmService = llmService
-        self.storageService = storageService
-    }
-    
-    func start() throws {
-        // TODO: Implement HTTP proxy server
-        // This would intercept web requests and analyze them
-        print("Proxy service implementation needed")
-    }
-    
-    func stop() {
-        server?.stop()
-    }
-}
-
-// Placeholder for HTTP server
-class HTTPServer {
-    func stop() {
-        // Implementation needed
-    }
-}
+// ProxyService is now implemented in KidGuardCore/Services/ProxyService.swift
 
 enum DaemonError: Error {
     case alreadyRunning

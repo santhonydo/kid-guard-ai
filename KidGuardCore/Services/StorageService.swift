@@ -11,21 +11,27 @@ public class StorageService: ObservableObject {
     }
     
     private init() {
-        container = NSPersistentContainer(name: "KidGuardAI")
-        
+        // Load Core Data model from bundle
+        guard let modelURL = Bundle.module.url(forResource: "KidGuardAI", withExtension: "momd"),
+              let managedObjectModel = NSManagedObjectModel(contentsOf: modelURL) else {
+            fatalError("Failed to load Core Data model from bundle")
+        }
+
+        container = NSPersistentContainer(name: "KidGuardAI", managedObjectModel: managedObjectModel)
+
         // Configure for encrypted storage
         let storeURL = getDocumentsDirectory().appendingPathComponent("KidGuardAI.sqlite")
         let description = NSPersistentStoreDescription(url: storeURL)
         description.setOption(FileProtectionType.complete as NSObject, forKey: NSPersistentStoreFileProtectionKey)
-        
+
         container.persistentStoreDescriptions = [description]
-        
+
         container.loadPersistentStores { _, error in
             if let error = error {
                 fatalError("Core Data failed to load: \(error.localizedDescription)")
             }
         }
-        
+
         container.viewContext.automaticallyMergesChangesFromParent = true
     }
     
@@ -162,8 +168,8 @@ public class StorageService: ObservableObject {
     }
 }
 
-// Core Data Entities would be defined in a .xcdatamodeld file
-// For now, we'll create simple NSManagedObject subclasses
+// Core Data Entities - corresponding to the KidGuardAI.xcdatamodeld schema
+// These NSManagedObject subclasses provide Swift interfaces to the entities
 
 import CoreData
 
@@ -178,6 +184,12 @@ public class RuleEntity: NSManagedObject {
     @NSManaged public var createdAt: Date?
 }
 
+extension RuleEntity {
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<RuleEntity> {
+        return NSFetchRequest<RuleEntity>(entityName: "RuleEntity")
+    }
+}
+
 @objc(EventEntity)
 public class EventEntity: NSManagedObject {
     @NSManaged public var id: UUID?
@@ -190,4 +202,10 @@ public class EventEntity: NSManagedObject {
     @NSManaged public var action: String?
     @NSManaged public var severity: String?
     @NSManaged public var processed: Bool
+}
+
+extension EventEntity {
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<EventEntity> {
+        return NSFetchRequest<EventEntity>(entityName: "EventEntity")
+    }
 }
