@@ -1,0 +1,41 @@
+# Build artifacts
+.build/
+*.xcworkspace
+*.xcodeproj
+DerivedData/
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+
+# Test files
+Tests/
+*.test
+
+# Package manager
+.package-resolved
+
+# Local development
+.env
+*.local
+
+# Screenshots and data (will be created in container)
+screenshots/
+data/
+logs/

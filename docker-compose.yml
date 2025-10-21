@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  kidguard-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kidguard-ai
+    restart: unless-stopped
+    ports:
+      - "8080:8080"   # Proxy service
+      - "11434:11434" # Ollama API
+    volumes:
+      - kidguard_data:/app/data
+      - kidguard_models:/app/data/models
+      - kidguard_screenshots:/app/data/screenshots
+      - kidguard_logs:/app/data/logs
+    environment:
+      - DOWNLOAD_PREMIUM_MODEL=false
+      - LOG_LEVEL=info
+      - OLLAMA_HOST=0.0.0.0:11434
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+          cpus: '4.0'
+        reservations:
+          memory: 4G
+          cpus: '2.0'
+
+  # Optional: Web interface for management
+  kidguard-web:
+    image: nginx:alpine
+    container_name: kidguard-web
+    restart: unless-stopped
+    ports:
+      - "8888:80"
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - kidguard-ai
+    profiles:
+      - web
+
+volumes:
+  kidguard_data:
+    driver: local
+  kidguard_models:
+    driver: local
+  kidguard_screenshots:
+    driver: local
+  kidguard_logs:
+    driver: local
+
+networks:
+  default:
+    name: kidguard-network
