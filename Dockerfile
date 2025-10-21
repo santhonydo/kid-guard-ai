@@ -40,12 +40,10 @@ WORKDIR /app
 
 # Copy package files first for better caching
 COPY Package.swift .
-COPY Package.resolved . 
 
 # Copy source code
 COPY KidGuardCore/ KidGuardCore/
 COPY KidGuardAIDaemon/ KidGuardAIDaemon/
-COPY Tests/ Tests/
 
 # Build the application
 RUN swift build --product KidGuardAIDaemon -c release

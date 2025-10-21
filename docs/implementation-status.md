@@ -1,5 +1,8 @@
 # KidGuard AI: Implementation Status
 
+> **Comprehensive technical reference for project state.**  
+> For quick-start next steps, see [NEXT_STEPS.md](./NEXT_STEPS.md)
+
 ## Overview
 This document details what has been implemented in the current version of KidGuard AI, including the container-first approach for development and testing.
 

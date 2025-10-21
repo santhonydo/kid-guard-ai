@@ -22,7 +22,9 @@ public class StorageService: ObservableObject {
         // Configure for encrypted storage
         let storeURL = getDocumentsDirectory().appendingPathComponent("KidGuardAI.sqlite")
         let description = NSPersistentStoreDescription(url: storeURL)
+        #if os(iOS)
         description.setOption(FileProtectionType.complete as NSObject, forKey: NSPersistentStoreFileProtectionKey)
+        #endif
 
         container.persistentStoreDescriptions = [description]
 

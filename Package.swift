@@ -10,6 +10,7 @@ let package = Package(
     products: [
         .executable(name: "KidGuardAI", targets: ["KidGuardAI"]),
         .executable(name: "KidGuardAIDaemon", targets: ["KidGuardAIDaemon"]),
+        .executable(name: "ManualTest", targets: ["ManualTest"]),
         .library(name: "KidGuardCore", targets: ["KidGuardCore"])
     ],
     dependencies: [
@@ -42,10 +43,17 @@ let package = Package(
                 .process("Resources/KidGuardAI.xcdatamodeld")
             ]
         ),
+        .executableTarget(
+            name: "ManualTest",
+            dependencies: [],
+            path: "Tests",
+            sources: ["ManualTest.swift"]
+        ),
         .testTarget(
             name: "KidGuardAITests",
             dependencies: ["KidGuardCore"],
-            path: "Tests"
+            path: "Tests",
+            exclude: ["ManualTest.swift"]
         )
     ]
 )

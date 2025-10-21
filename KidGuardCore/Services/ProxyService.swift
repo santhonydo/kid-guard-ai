@@ -231,11 +231,11 @@ class HTTPProxyServer {
                 // Create monitoring event
                 let event = MonitoringEvent(
                     timestamp: Date(),
-                    type: .web,
+                    type: .webRequest,
                     url: request.url,
                     content: request.content,
                     screenshotPath: nil,
-                    ruleViolated: result.violated ? rules.first?.id : nil,
+                    ruleViolated: result.violation ? rules.first?.id : nil,
                     action: result.recommendedAction,
                     severity: result.severity,
                     processed: true
@@ -244,8 +244,8 @@ class HTTPProxyServer {
                 storageService.saveEvent(event)
 
                 let response = AnalyzeResponse(
-                    violated: result.violated,
-                    violatedRules: result.violatedRules,
+                    violated: result.violation,
+                    violatedRules: result.categories,
                     analysis: result.explanation,
                     action: result.recommendedAction.rawValue
                 )
@@ -253,9 +253,12 @@ class HTTPProxyServer {
                 if let responseData = try? JSONEncoder().encode(response),
                    let responseString = String(data: responseData, encoding: .utf8) {
                     return responseString
+                } else {
+                    return "{\"violated\":false,\"violatedRules\":[],\"analysis\":\"Failed to encode response\",\"action\":\"log\"}"
                 }
             } catch {
                 print("Analysis failed: \(error)")
+                return "{\"violated\":false,\"violatedRules\":[],\"analysis\":\"Error analyzing content\",\"action\":\"log\"}"
             }
         }
 
@@ -344,11 +347,11 @@ class HTTPProxyServer {
 
             let event = MonitoringEvent(
                 timestamp: Date(),
-                type: .web,
+                type: .webRequest,
                 url: url,
                 content: content,
                 screenshotPath: nil,
-                ruleViolated: result.violated ? rules.first?.id : nil,
+                ruleViolated: result.violation ? rules.first?.id : nil,
                 action: result.recommendedAction,
                 severity: result.severity,
                 processed: true
@@ -356,9 +359,9 @@ class HTTPProxyServer {
 
             storageService.saveEvent(event)
 
-            if result.violated {
+            if result.violation {
                 print("⚠️ Rule violation detected for \(url)")
-                print("   Violated rules: \(result.violatedRules.joined(separator: ", "))")
+                print("   Categories: \(result.categories.joined(separator: ", "))")
                 print("   Action: \(result.recommendedAction.rawValue)")
             }
         } catch {

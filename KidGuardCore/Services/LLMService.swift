@@ -109,7 +109,7 @@ public class LLMService: LLMServiceProtocol {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let body = [
+        let body: [String: Any] = [
             "model": model,
             "prompt": prompt,
             "stream": false
@@ -137,7 +137,7 @@ public class LLMService: LLMServiceProtocol {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let body = [
+        let body: [String: Any] = [
             "model": model,
             "prompt": prompt,
             "images": [base64Image],

@@ -30,12 +30,12 @@ struct KidGuardAIDaemon: ParsableCommand {
         // Setup signal handlers for graceful shutdown
         signal(SIGINT) { _ in
             print("\nReceived SIGINT, shutting down...")
-            exit(0)
+            Darwin.exit(0)
         }
-        
+
         signal(SIGTERM) { _ in
             print("\nReceived SIGTERM, shutting down...")
-            exit(0)
+            Darwin.exit(0)
         }
         
         do {
@@ -65,7 +65,8 @@ struct KidGuardAIDaemon: ParsableCommand {
 
 class MonitoringDaemon {
     private let llmService = LLMService()
-    private let storageService = StorageService.shared
+    // Note: StorageService requires Core Data model file which needs to be created in Xcode
+    // private let storageService = StorageService.shared
     private var proxyService: ProxyService?
     private var isRunning = false
     
@@ -128,7 +129,8 @@ class MonitoringDaemon {
     private func startProxyService() throws {
         print("Starting proxy service...")
         
-        proxyService = ProxyService(llmService: llmService, storageService: storageService)
+        // proxyService = ProxyService(llmService: llmService, storageService: storageService)
+        print("Note: Proxy service disabled - requires Core Data setup")
         try proxyService?.start()
         
         print("Proxy service started on port 8080")

@@ -251,3 +251,38 @@ docker-compose logs -f kidguard-ai
 # Execute commands in container
 docker exec -it kidguard-ai /bin/bash
 ```
+
+## File Organization Rules
+
+ALWAYS follow these file organization conventions:
+- **Shell scripts (*.sh):** Place in `scripts/` directory
+- **Documentation (*.md):** Place in `docs/` directory
+- **EXCEPTIONS:** `CLAUDE.md` and `README.md` remain in root
+- **Configuration files:** (.gitignore, Package.swift, Makefile, docker-compose.yml, etc.) Keep in root
+- **Source code:** Keep in designated directories (KidGuardCore/, KidGuardAI/, KidGuardAIDaemon/, Tests/)
+- When creating new scripts or documentation, ALWAYS put them in the appropriate directory from the start
+
+## Testing & Scripts
+
+All test and utility scripts are located in `scripts/`:
+- `scripts/test_ai.sh` - Quick AI validation
+- `scripts/test_ai_consistency.sh` - Comprehensive JSON consistency testing (22 test cases)
+- `scripts/test_improved_prompts.sh` - Prompt engineering validation
+- `scripts/download-models.sh` - Download Ollama AI models
+- `scripts/start.sh` - Container startup script
+
+All documentation is in `docs/`:
+- `docs/AI_CONSISTENCY_SUMMARY.md` - Complete AI reliability analysis
+- `docs/NEXT_STEPS.md` - Development roadmap and next steps
+- `docs/ai-reliability-report.md` - Technical AI testing report
+- `docs/model-comparison.md` - Mistral vs Mixtral comparison
+- `docs/implementation-status.md` - Project status tracker
+- `docs/architecture-diagram.md` - System architecture
+- `docs/application-specs.md` - Application specifications
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+ALWAYS follow the file organization rules above - scripts in scripts/, docs in docs/.
