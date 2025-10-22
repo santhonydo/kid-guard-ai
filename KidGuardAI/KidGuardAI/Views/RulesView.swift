@@ -220,60 +220,91 @@ struct AddRuleSheet: View {
     let onAdd: () -> Void
     let onVoiceInput: () -> Void
     @Environment(\.dismiss) private var dismiss
-    
+    @FocusState private var isTextFieldFocused: Bool
+
     var body: some View {
         NavigationView {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Add Monitoring Rule")
                     .font(.title2)
                     .fontWeight(.semibold)
-                
+
                 Text("Describe what you want to monitor or block in natural language.")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                
+
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Rule Description")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                    
-                    TextEditor(text: $text)
-                        .frame(height: 80)
-                        .padding(8)
-                        .background(Color(.textBackgroundColor))
-                        .cornerRadius(8)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color(.separatorColor), lineWidth: 1)
-                        )
+                    HStack {
+                        Text("Rule Description")
+                            .font(.caption)
+                            .fontWeight(.medium)
+
+                        Spacer()
+
+                        // Secondary voice input option
+                        Button(action: onVoiceInput) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "mic.fill")
+                                    .font(.caption)
+                                Text("Voice")
+                                    .font(.caption)
+                            }
+                            .foregroundColor(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Use voice input instead")
+                    }
+
+                    ZStack(alignment: .topLeading) {
+                        // Placeholder text
+                        if text.isEmpty {
+                            Text("e.g., Block violent content and mature themes")
+                                .font(.body)
+                                .foregroundColor(Color(.placeholderTextColor))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 12)
+                        }
+
+                        TextEditor(text: $text)
+                            .font(.body)
+                            .frame(height: 100)
+                            .padding(4)
+                            .background(Color(.textBackgroundColor))
+                            .cornerRadius(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(isTextFieldFocused ? Color.accentColor : Color(.separatorColor), lineWidth: isTextFieldFocused ? 2 : 1)
+                            )
+                            .focused($isTextFieldFocused)
+                    }
                 }
-                
+
                 Text("Examples:")
                     .font(.caption)
                     .fontWeight(.medium)
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     ExampleText("Block violent content and mature themes")
                     ExampleText("Alert me if social media is accessed")
                     ExampleText("Log all messaging activity")
                 }
-                
+
                 Spacer()
-                
+
                 HStack(spacing: 12) {
-                    Button("Use Voice") {
-                        onVoiceInput()
-                    }
-                    .buttonStyle(.bordered)
-                    
-                    Spacer()
-                    
                     Button("Cancel") {
                         dismiss()
                     }
                     .buttonStyle(.bordered)
-                    
-                    Button("Add Rule") {
+
+                    Spacer()
+
+                    if isLoading {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                    }
+
+                    Button(isLoading ? "Adding..." : "Add Rule") {
                         onAdd()
                     }
                     .buttonStyle(.borderedProminent)
@@ -281,7 +312,11 @@ struct AddRuleSheet: View {
                 }
             }
             .padding()
-            .frame(width: 400, height: 350)
+            .frame(width: 450, height: 380)
+            .onAppear {
+                // Auto-focus the text field when the sheet opens
+                isTextFieldFocused = true
+            }
         }
     }
 }
