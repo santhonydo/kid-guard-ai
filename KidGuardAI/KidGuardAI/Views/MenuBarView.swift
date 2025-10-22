@@ -54,9 +54,15 @@ struct MenuBarView: View {
             }
             .padding()
             .background(Color(.controlBackgroundColor))
-            
+
             Divider()
-            
+
+            // Quick Actions
+            QuickActionsView()
+                .environmentObject(coordinator)
+
+            Divider()
+
             // Tab Selection
             HStack(spacing: 0) {
                 ForEach(Tab.allCases, id: \.self) { tab in
