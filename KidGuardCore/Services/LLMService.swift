@@ -121,7 +121,7 @@ public class LLMService: LLMServiceProtocol {
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         
         guard let response = json?["response"] as? String else {
-            throw LLMError.invalidResponse
+            throw LLMError.invalidResponse("No response from Ollama API")
         }
         
         return response
@@ -150,7 +150,7 @@ public class LLMService: LLMServiceProtocol {
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         
         guard let response = json?["response"] as? String else {
-            throw LLMError.invalidResponse
+            throw LLMError.invalidResponse("Empty response from vision model")
         }
         
         return response
@@ -163,7 +163,7 @@ public class LLMService: LLMServiceProtocol {
               let categories = parsed["categories"] as? [String],
               let actionStrings = parsed["actions"] as? [String],
               let severityString = parsed["severity"] as? String else {
-            throw LLMError.invalidResponse
+            throw LLMError.invalidResponse("Invalid rule JSON format")
         }
         
         let actions = actionStrings.compactMap { RuleAction(rawValue: $0) }
@@ -185,7 +185,7 @@ public class LLMService: LLMServiceProtocol {
               let explanation = parsed["explanation"] as? String,
               let categories = parsed["categories"] as? [String],
               let actionString = parsed["recommendedAction"] as? String else {
-            throw LLMError.invalidResponse
+            throw LLMError.invalidResponse("Invalid analysis JSON format")
         }
         
         let severity = RuleSeverity(rawValue: severityString) ?? .medium
@@ -218,7 +218,7 @@ public struct AnalysisResult {
 }
 
 public enum LLMError: Error {
-    case invalidResponse
-    case networkError
-    case modelNotAvailable
+    case invalidResponse(String)
+    case networkError(String)
+    case modelNotAvailable(String)
 }

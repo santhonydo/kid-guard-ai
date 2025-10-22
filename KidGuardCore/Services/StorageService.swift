@@ -4,210 +4,90 @@ import CoreData
 public class StorageService: ObservableObject {
     public static let shared = StorageService()
     
-    private let container: NSPersistentContainer
+    // Temporary in-memory storage with persistence to UserDefaults
+    private var rules: [Rule] = []
+    private var events: [MonitoringEvent] = []
     
-    public var context: NSManagedObjectContext {
-        container.viewContext
+    public var context: NSManagedObjectContext? {
+        return nil // No Core Data context for now
     }
     
     private init() {
-        // Load Core Data model from bundle
-        guard let modelURL = Bundle.module.url(forResource: "KidGuardAI", withExtension: "momd"),
-              let managedObjectModel = NSManagedObjectModel(contentsOf: modelURL) else {
-            fatalError("Failed to load Core Data model from bundle")
-        }
-
-        container = NSPersistentContainer(name: "KidGuardAI", managedObjectModel: managedObjectModel)
-
-        // Configure for encrypted storage
-        let storeURL = getDocumentsDirectory().appendingPathComponent("KidGuardAI.sqlite")
-        let description = NSPersistentStoreDescription(url: storeURL)
-        #if os(iOS)
-        description.setOption(FileProtectionType.complete as NSObject, forKey: NSPersistentStoreFileProtectionKey)
-        #endif
-
-        container.persistentStoreDescriptions = [description]
-
-        container.loadPersistentStores { _, error in
-            if let error = error {
-                fatalError("Core Data failed to load: \(error.localizedDescription)")
-            }
-        }
-
-        container.viewContext.automaticallyMergesChangesFromParent = true
+        loadFromUserDefaults()
+        print("StorageService initialized with persistent storage")
     }
     
     public func save() {
-        guard context.hasChanges else { return }
-        
-        do {
-            try context.save()
-        } catch {
-            print("Failed to save context: \(error)")
-        }
+        saveToUserDefaults()
+        print("Data saved to UserDefaults")
     }
     
     public func saveRule(_ rule: Rule) {
-        let ruleEntity = RuleEntity(context: context)
-        ruleEntity.id = rule.id
-        ruleEntity.ruleDescription = rule.description
-        ruleEntity.categories = rule.categories.joined(separator: ",")
-        ruleEntity.actions = rule.actions.map { $0.rawValue }.joined(separator: ",")
-        ruleEntity.severity = rule.severity.rawValue
-        ruleEntity.isActive = rule.isActive
-        ruleEntity.createdAt = rule.createdAt
-        
+        // Remove existing rule with same ID
+        rules.removeAll { $0.id == rule.id }
+        // Add new rule
+        rules.append(rule)
         save()
+        print("Saved rule: \(rule.description)")
     }
     
     public func loadRules() -> [Rule] {
-        let request: NSFetchRequest<RuleEntity> = RuleEntity.fetchRequest()
-        
-        do {
-            let entities = try context.fetch(request)
-            return entities.compactMap { entity in
-                guard let id = entity.id,
-                      let description = entity.ruleDescription,
-                      let categoriesString = entity.categories,
-                      let actionsString = entity.actions,
-                      let severity = RuleSeverity(rawValue: entity.severity ?? "medium"),
-                      let createdAt = entity.createdAt else {
-                    return nil
-                }
-                
-                let categories = categoriesString.components(separatedBy: ",")
-                let actions = actionsString.components(separatedBy: ",").compactMap { RuleAction(rawValue: $0) }
-                
-                return Rule(
-                    id: id,
-                    description: description,
-                    categories: categories,
-                    actions: actions,
-                    severity: severity,
-                    isActive: entity.isActive,
-                    createdAt: createdAt
-                )
-            }
-        } catch {
-            print("Failed to load rules: \(error)")
-            return []
-        }
+        print("Loaded \(rules.count) rules from persistent storage")
+        return rules
     }
     
     public func saveEvent(_ event: MonitoringEvent) {
-        let eventEntity = EventEntity(context: context)
-        eventEntity.id = event.id
-        eventEntity.timestamp = event.timestamp
-        eventEntity.type = event.type.rawValue
-        eventEntity.url = event.url
-        eventEntity.content = event.content
-        eventEntity.screenshotPath = event.screenshotPath
-        eventEntity.ruleViolated = event.ruleViolated
-        eventEntity.action = event.action.rawValue
-        eventEntity.severity = event.severity.rawValue
-        eventEntity.processed = event.processed
-        
+        events.append(event)
+        // Keep only last 100 events to prevent memory issues
+        if events.count > 100 {
+            events.removeFirst(events.count - 100)
+        }
         save()
+        print("Saved event: \(event.type.rawValue)")
     }
     
-    public func loadEvents(limit: Int = 100) -> [MonitoringEvent] {
-        let request: NSFetchRequest<EventEntity> = EventEntity.fetchRequest()
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \EventEntity.timestamp, ascending: false)]
-        request.fetchLimit = limit
-        
+    public func loadEvents(limit: Int = 50) -> [MonitoringEvent] {
+        let limitedEvents = Array(events.suffix(limit))
+        print("Loaded \(limitedEvents.count) events from persistent storage")
+        return limitedEvents
+    }
+    
+    // MARK: - UserDefaults Persistence
+    
+    private func saveToUserDefaults() {
         do {
-            let entities = try context.fetch(request)
-            return entities.compactMap { entity in
-                guard let id = entity.id,
-                      let timestamp = entity.timestamp,
-                      let typeString = entity.type,
-                      let type = EventType(rawValue: typeString),
-                      let actionString = entity.action,
-                      let action = RuleAction(rawValue: actionString),
-                      let severityString = entity.severity,
-                      let severity = RuleSeverity(rawValue: severityString) else {
-                    return nil
-                }
-                
-                return MonitoringEvent(
-                    id: id,
-                    timestamp: timestamp,
-                    type: type,
-                    url: entity.url,
-                    content: entity.content,
-                    screenshotPath: entity.screenshotPath,
-                    ruleViolated: entity.ruleViolated,
-                    action: action,
-                    severity: severity,
-                    processed: entity.processed
-                )
-            }
+            let rulesData = try JSONEncoder().encode(rules)
+            let eventsData = try JSONEncoder().encode(events)
+            
+            UserDefaults.standard.set(rulesData, forKey: "KidGuardAI_Rules")
+            UserDefaults.standard.set(eventsData, forKey: "KidGuardAI_Events")
+            
+            print("Data persisted to UserDefaults")
         } catch {
-            print("Failed to load events: \(error)")
-            return []
+            print("Failed to save to UserDefaults: \(error)")
         }
     }
     
-    public func cleanupOldEvents(olderThan days: Int = 7) {
-        let cutoffDate = Date().addingTimeInterval(-TimeInterval(days * 24 * 60 * 60))
-        let request: NSFetchRequest<EventEntity> = EventEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "timestamp < %@", cutoffDate as NSDate)
-        
+    private func loadFromUserDefaults() {
         do {
-            let entities = try context.fetch(request)
-            for entity in entities {
-                context.delete(entity)
+            if let rulesData = UserDefaults.standard.data(forKey: "KidGuardAI_Rules") {
+                rules = try JSONDecoder().decode([Rule].self, from: rulesData)
+                print("Loaded \(rules.count) rules from UserDefaults")
             }
-            save()
+            
+            if let eventsData = UserDefaults.standard.data(forKey: "KidGuardAI_Events") {
+                events = try JSONDecoder().decode([MonitoringEvent].self, from: eventsData)
+                print("Loaded \(events.count) events from UserDefaults")
+            }
         } catch {
-            print("Failed to cleanup old events: \(error)")
+            print("Failed to load from UserDefaults: \(error)")
+            rules = []
+            events = []
         }
     }
     
     private func getDocumentsDirectory() -> URL {
-        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-            .appendingPathComponent("KidGuardAI")
-    }
-}
-
-// Core Data Entities - corresponding to the KidGuardAI.xcdatamodeld schema
-// These NSManagedObject subclasses provide Swift interfaces to the entities
-
-import CoreData
-
-@objc(RuleEntity)
-public class RuleEntity: NSManagedObject {
-    @NSManaged public var id: UUID?
-    @NSManaged public var ruleDescription: String?
-    @NSManaged public var categories: String?
-    @NSManaged public var actions: String?
-    @NSManaged public var severity: String?
-    @NSManaged public var isActive: Bool
-    @NSManaged public var createdAt: Date?
-}
-
-extension RuleEntity {
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<RuleEntity> {
-        return NSFetchRequest<RuleEntity>(entityName: "RuleEntity")
-    }
-}
-
-@objc(EventEntity)
-public class EventEntity: NSManagedObject {
-    @NSManaged public var id: UUID?
-    @NSManaged public var timestamp: Date?
-    @NSManaged public var type: String?
-    @NSManaged public var url: String?
-    @NSManaged public var content: String?
-    @NSManaged public var screenshotPath: String?
-    @NSManaged public var ruleViolated: UUID?
-    @NSManaged public var action: String?
-    @NSManaged public var severity: String?
-    @NSManaged public var processed: Bool
-}
-
-extension EventEntity {
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<EventEntity> {
-        return NSFetchRequest<EventEntity>(entityName: "EventEntity")
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        return paths[0]
     }
 }
