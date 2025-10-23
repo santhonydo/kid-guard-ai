@@ -36,9 +36,9 @@ struct MenuBarView: View {
                 Text("KidGuard AI")
                     .font(.headline)
                     .fontWeight(.semibold)
-                
+
                 Spacer()
-                
+
                 Button(action: {
                     if coordinator.isMonitoring {
                         coordinator.stopMonitoring()
@@ -51,15 +51,19 @@ struct MenuBarView: View {
                         .font(.title2)
                 }
                 .buttonStyle(PlainButtonStyle())
+
+                Button(action: {
+                    NSApplication.shared.terminate(nil)
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.secondary)
+                        .font(.title2)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .help("Quit KidGuard AI")
             }
             .padding()
             .background(Color(.controlBackgroundColor))
-
-            Divider()
-
-            // Quick Actions
-            QuickActionsView()
-                .environmentObject(coordinator)
 
             Divider()
 

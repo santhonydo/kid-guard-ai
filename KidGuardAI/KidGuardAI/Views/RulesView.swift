@@ -66,23 +66,21 @@ struct RulesView: View {
         .sheet(isPresented: $showingAddRule) {
             AddRuleSheet(
                 text: $newRuleText,
-                isLoading: $isAddingRule
-            ) {
-                guard !newRuleText.isEmpty else { return }
-                
-                isAddingRule = true
-                Task {
-                    await coordinator.addRule(from: newRuleText)
-                    await MainActor.run {
-                        newRuleText = ""
-                        isAddingRule = false
-                        showingAddRule = false
+                isLoading: $isAddingRule,
+                onAdd: {
+                    guard !newRuleText.isEmpty else { return }
+
+                    isAddingRule = true
+                    Task {
+                        await coordinator.addRule(from: newRuleText)
+                        await MainActor.run {
+                            newRuleText = ""
+                            isAddingRule = false
+                            showingAddRule = false
+                        }
                     }
                 }
-            } onVoiceInput: {
-                coordinator.startVoiceInput()
-                showingAddRule = false
-            }
+            )
         }
     }
 }
@@ -122,12 +120,12 @@ struct RuleCard: View {
                 Spacer()
                 
                 VStack(spacing: 8) {
-                    Toggle("", isOn: .constant(rule.isActive))
-                        .toggleStyle(SwitchToggleStyle())
-                        .onReceive(NotificationCenter.default.publisher(for: .init("toggleRule"))) { _ in
-                            onToggle()
-                        }
-                    
+                    Toggle("", isOn: Binding(
+                        get: { rule.isActive },
+                        set: { _ in onToggle() }
+                    ))
+                    .toggleStyle(SwitchToggleStyle())
+
                     Button(action: onDelete) {
                         Image(systemName: "trash")
                             .foregroundColor(.red)
@@ -218,105 +216,85 @@ struct AddRuleSheet: View {
     @Binding var text: String
     @Binding var isLoading: Bool
     let onAdd: () -> Void
-    let onVoiceInput: () -> Void
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isTextFieldFocused: Bool
 
     var body: some View {
-        NavigationView {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Add Monitoring Rule")
-                    .font(.title2)
-                    .fontWeight(.semibold)
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Add Monitoring Rule")
+                .font(.title2)
+                .fontWeight(.semibold)
 
-                Text("Describe what you want to monitor or block in natural language.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            Text("Describe what you want to monitor or block in natural language.")
+                .font(.caption)
+                .foregroundColor(.secondary)
 
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text("Rule Description")
-                            .font(.caption)
-                            .fontWeight(.medium)
-
-                        Spacer()
-
-                        // Secondary voice input option
-                        Button(action: onVoiceInput) {
-                            HStack(spacing: 4) {
-                                Image(systemName: "mic.fill")
-                                    .font(.caption)
-                                Text("Voice")
-                                    .font(.caption)
-                            }
-                            .foregroundColor(.secondary)
-                        }
-                        .buttonStyle(.plain)
-                        .help("Use voice input instead")
-                    }
-
-                    ZStack(alignment: .topLeading) {
-                        // Placeholder text
-                        if text.isEmpty {
-                            Text("e.g., Block violent content and mature themes")
-                                .font(.body)
-                                .foregroundColor(Color(.placeholderTextColor))
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 12)
-                        }
-
-                        TextEditor(text: $text)
-                            .font(.body)
-                            .frame(height: 100)
-                            .padding(4)
-                            .background(Color(.textBackgroundColor))
-                            .cornerRadius(8)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(isTextFieldFocused ? Color.accentColor : Color(.separatorColor), lineWidth: isTextFieldFocused ? 2 : 1)
-                            )
-                            .focused($isTextFieldFocused)
-                    }
-                }
-
-                Text("Examples:")
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Rule Description")
                     .font(.caption)
                     .fontWeight(.medium)
 
-                VStack(alignment: .leading, spacing: 4) {
-                    ExampleText("Block violent content and mature themes")
-                    ExampleText("Alert me if social media is accessed")
-                    ExampleText("Log all messaging activity")
+                ZStack(alignment: .topLeading) {
+                    // Placeholder text
+                    if text.isEmpty {
+                        Text("e.g., Block violent content and mature themes")
+                            .font(.body)
+                            .foregroundColor(Color(.placeholderTextColor))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 12)
+                    }
+
+                    TextEditor(text: $text)
+                        .font(.body)
+                        .frame(height: 100)
+                        .padding(4)
+                        .background(Color(.textBackgroundColor))
+                        .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(isTextFieldFocused ? Color.accentColor : Color(.separatorColor), lineWidth: isTextFieldFocused ? 2 : 1)
+                        )
+                        .focused($isTextFieldFocused)
                 }
+            }
+
+            Text("Examples:")
+                .font(.caption)
+                .fontWeight(.medium)
+
+            VStack(alignment: .leading, spacing: 4) {
+                ExampleText("Block violent content and mature themes")
+                ExampleText("Alert me if social media is accessed")
+                ExampleText("Log all messaging activity")
+            }
+
+            Spacer()
+
+            HStack(spacing: 12) {
+                Button("Cancel") {
+                    dismiss()
+                }
+                .buttonStyle(.bordered)
 
                 Spacer()
 
-                HStack(spacing: 12) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                    .buttonStyle(.bordered)
-
-                    Spacer()
-
-                    if isLoading {
-                        ProgressView()
-                            .scaleEffect(0.8)
-                    }
-
-                    Button(isLoading ? "Adding..." : "Add Rule") {
-                        onAdd()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(text.isEmpty || isLoading)
+                if isLoading {
+                    ProgressView()
+                        .scaleEffect(0.8)
                 }
+
+                Button(isLoading ? "Adding..." : "Add Rule") {
+                    onAdd()
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(text.isEmpty || isLoading)
             }
-            .padding()
-            .frame(width: 450, height: 380)
-            .onAppear {
-                // Auto-focus the text field when the sheet opens
-                isTextFieldFocused = true
-            }
+        }
+        .padding()
+        .frame(width: 450, height: 380)
+        .onAppear {
+            // Auto-focus the text field when the sheet opens
+            isTextFieldFocused = true
         }
     }
 }

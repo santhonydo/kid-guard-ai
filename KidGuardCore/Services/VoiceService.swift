@@ -12,7 +12,7 @@ public class VoiceService: NSObject, ObservableObject {
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
-    private let audioEngine = AVAudioEngine()
+    private var audioEngine = AVAudioEngine()
     private let speechSynthesizer = AVSpeechSynthesizer()
     
     @Published public var isListening = false
@@ -32,18 +32,33 @@ public class VoiceService: NSObject, ObservableObject {
     }
     
     public func startListening() throws {
+        print("🎤 Starting voice input...")
+        print("🎤 Speech authorized: \(isAuthorized)")
+        print("🎤 Audio engine running: \(audioEngine.isRunning)")
+
         guard isAuthorized else {
+            print("❌ Speech recognition not authorized")
             throw VoiceError.notAuthorized
         }
-        
-        guard !audioEngine.isRunning else {
-            throw VoiceError.alreadyListening
+
+        // Stop if already running and reset audio engine
+        if audioEngine.isRunning {
+            print("🎤 Audio engine already running, stopping first...")
+            stopListening()
+            // Give it a moment to fully stop
+            Thread.sleep(forTimeInterval: 0.2)
         }
-        
+
+        // If still running, recreate the audio engine entirely
+        if audioEngine.isRunning {
+            print("🎤 Recreating audio engine...")
+            audioEngine = AVAudioEngine()
+        }
+
         // Cancel previous task
         recognitionTask?.cancel()
         recognitionTask = nil
-        
+
         // Configure audio session (iOS only)
         #if os(iOS)
         let audioSession = AVAudioSession.sharedInstance()
@@ -63,18 +78,37 @@ public class VoiceService: NSObject, ObservableObject {
         
         // Create recognition task
         recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest) { [weak self] result, error in
+            var shouldStop = false
+
             if let result = result {
                 let recognizedText = result.bestTranscription.formattedString
-                
+
                 if result.isFinal {
                     self?.delegate?.voiceService(self!, didRecognize: recognizedText)
-                    self?.stopListening()
+                    shouldStop = true
                 }
             }
-            
+
             if let error = error {
-                self?.delegate?.voiceService(self!, didFailWithError: error)
+                let nsError = error as NSError
+                // Ignore "no speech detected" error - just means user hasn't spoken yet
+                if nsError.domain != "kAFAssistantErrorDomain" || nsError.code != 1107 {
+                    self?.delegate?.voiceService(self!, didFailWithError: error)
+                    shouldStop = true
+                }
+            }
+
+            if shouldStop {
                 self?.stopListening()
+            }
+        }
+
+        // Auto-stop after 5 seconds of listening
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
+            if self?.isListening == true {
+                self?.stopListening()
+                // Trigger final recognition if we got any partial results
+                self?.recognitionRequest?.endAudio()
             }
         }
         
@@ -85,23 +119,35 @@ public class VoiceService: NSObject, ObservableObject {
         }
         
         audioEngine.prepare()
-        try audioEngine.start()
-        
+
+        do {
+            try audioEngine.start()
+            print("✅ Audio engine started successfully")
+            print("🎤 Listening for speech...")
+        } catch {
+            print("❌ Failed to start audio engine: \(error)")
+            throw VoiceError.microphoneNotAuthorized
+        }
+
         DispatchQueue.main.async {
             self.isListening = true
         }
     }
     
     public func stopListening() {
-        audioEngine.stop()
-        audioEngine.inputNode.removeTap(onBus: 0)
-        
+        if audioEngine.isRunning {
+            audioEngine.stop()
+            if audioEngine.inputNode.numberOfInputs > 0 {
+                audioEngine.inputNode.removeTap(onBus: 0)
+            }
+        }
+
         recognitionRequest?.endAudio()
         recognitionRequest = nil
-        
+
         recognitionTask?.cancel()
         recognitionTask = nil
-        
+
         DispatchQueue.main.async {
             self.isListening = false
         }
@@ -128,13 +174,16 @@ public class VoiceService: NSObject, ObservableObject {
 
 public enum VoiceError: Error {
     case notAuthorized
+    case microphoneNotAuthorized
     case alreadyListening
     case unableToCreateRequest
-    
+
     public var localizedDescription: String {
         switch self {
         case .notAuthorized:
-            return "Speech recognition not authorized"
+            return "Speech recognition not authorized. Please grant permission in System Settings > Privacy & Security > Speech Recognition"
+        case .microphoneNotAuthorized:
+            return "Microphone access not authorized. Please grant permission in System Settings > Privacy & Security > Microphone"
         case .alreadyListening:
             return "Already listening"
         case .unableToCreateRequest:

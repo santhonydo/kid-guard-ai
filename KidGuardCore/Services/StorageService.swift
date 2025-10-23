@@ -35,7 +35,13 @@ public class StorageService: ObservableObject {
         print("Loaded \(rules.count) rules from persistent storage")
         return rules
     }
-    
+
+    public func deleteRule(_ rule: Rule) {
+        rules.removeAll { $0.id == rule.id }
+        save()
+        print("Deleted rule: \(rule.description)")
+    }
+
     public func saveEvent(_ event: MonitoringEvent) {
         events.append(event)
         // Keep only last 100 events to prevent memory issues

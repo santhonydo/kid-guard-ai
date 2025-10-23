@@ -9,9 +9,9 @@ public protocol LLMServiceProtocol {
 
 public class LLMService: LLMServiceProtocol {
     private let ollamaURL: URL
-    private let modelName: String
-    private let visionModelName: String
-    
+    private var modelName: String
+    private var visionModelName: String
+
     public init(
         ollamaURL: URL = URL(string: "http://localhost:11434")!,
         modelName: String = "mistral:7b-instruct",
@@ -21,20 +21,27 @@ public class LLMService: LLMServiceProtocol {
         self.modelName = modelName
         self.visionModelName = visionModelName
     }
+
+    public func setModel(name: String) {
+        self.modelName = name
+        print("🤖 Switched to AI model: \(name)")
+    }
+
+    public func setVisionModel(name: String) {
+        self.visionModelName = name
+        print("👁️ Switched to vision model: \(name)")
+    }
     
     public func parseRule(from text: String) async throws -> Rule {
         let prompt = """
-        Parse this parental control rule into structured data. Return JSON with categories (array of strings) and actions (array from: block, alert, log, redirect).
-        
+        Parse this parental control rule. Return ONLY valid JSON, no extra text.
+
         Rule: "\(text)"
-        
-        Respond only with valid JSON in this format:
-        {
-            "description": "original rule text",
-            "categories": ["category1", "category2"],
-            "actions": ["block"],
-            "severity": "medium"
-        }
+
+        Return this exact format:
+        {"description": "\(text)", "categories": ["category"], "actions": ["block"], "severity": "medium"}
+
+        Use: actions (block/alert/log/redirect), severity (low/medium/high/critical)
         """
         
         let response = try await sendRequest(prompt: prompt, model: modelName)
@@ -69,22 +76,17 @@ public class LLMService: LLMServiceProtocol {
     
     public func analyzeScreenshot(at path: String, against rules: [Rule]) async throws -> AnalysisResult {
         let activeRules = rules.filter { $0.isActive }
-        let ruleDescriptions = activeRules.map { $0.description }.joined(separator: "\n- ")
-        
+        let ruleDescriptions = activeRules.map { $0.description }.joined(separator: ", ")
+
         let prompt = """
-        Analyze this screenshot for any violations of parental control rules. Respond with JSON only.
-        
-        Rules to check against:
-        - \(ruleDescriptions)
-        
-        Describe what you see and check for violations. Respond with:
-        {
-            "violation": true/false,
-            "severity": "low/medium/high/critical",
-            "explanation": "what you see and why it violates rules",
-            "categories": ["matched categories"],
-            "recommendedAction": "block/alert/log"
-        }
+        Analyze this screenshot for parental control rule violations. Return ONLY valid JSON, no other text.
+
+        Rules: \(ruleDescriptions)
+
+        Return this exact format:
+        {"violation": true, "severity": "low", "explanation": "brief description", "categories": ["category"], "recommendedAction": "log"}
+
+        Use: violation (true/false), severity (low/medium/high/critical), recommendedAction (block/alert/log)
         """
         
         let response = try await sendVisionRequest(prompt: prompt, imagePath: path, model: visionModelName)
@@ -157,40 +159,69 @@ public class LLMService: LLMServiceProtocol {
     }
     
     private func parseRuleFromJSON(_ json: String) throws -> Rule {
-        guard let data = json.data(using: .utf8),
-              let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let description = parsed["description"] as? String,
-              let categories = parsed["categories"] as? [String],
-              let actionStrings = parsed["actions"] as? [String],
-              let severityString = parsed["severity"] as? String else {
+        // Try to extract JSON from the response (in case there's extra text)
+        let jsonString = extractJSON(from: json)
+
+        guard let data = jsonString.data(using: .utf8) else {
+            print("❌ Failed to convert to data: \(jsonString)")
             throw LLMError.invalidResponse("Invalid rule JSON format")
         }
-        
+
+        guard let parsed = try? JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed) as? [String: Any] else {
+            print("❌ Failed to parse JSON: \(jsonString)")
+            throw LLMError.invalidResponse("Invalid rule JSON format")
+        }
+
+        var description = parsed["description"] as? String ?? "Unknown rule"
+        let categories = parsed["categories"] as? [String] ?? []
+        let actionStrings = parsed["actions"] as? [String] ?? ["log"]
+        let severityString = parsed["severity"] as? String ?? "medium"
+
+        // Clean up description if it has "original rule text:" prefix
+        if description.contains("original rule text:") {
+            description = description.replacingOccurrences(of: "original rule text:", with: "").trimmingCharacters(in: .whitespaces)
+        }
+
         let actions = actionStrings.compactMap { RuleAction(rawValue: $0) }
         let severity = RuleSeverity(rawValue: severityString) ?? .medium
-        
+
+        print("✅ Parsed rule: \(description)")
+
         return Rule(
             description: description,
             categories: categories,
-            actions: actions,
+            actions: actions.isEmpty ? [.log] : actions,
             severity: severity
         )
     }
     
     private func parseAnalysisResult(_ json: String) throws -> AnalysisResult {
-        guard let data = json.data(using: .utf8),
-              let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let violation = parsed["violation"] as? Bool,
-              let severityString = parsed["severity"] as? String,
-              let explanation = parsed["explanation"] as? String,
-              let categories = parsed["categories"] as? [String],
-              let actionString = parsed["recommendedAction"] as? String else {
+        // Try to extract JSON from the response (in case there's extra text)
+        let jsonString = extractJSON(from: json)
+
+        guard let data = jsonString.data(using: .utf8) else {
+            print("❌ Failed to convert to data: \(jsonString)")
             throw LLMError.invalidResponse("Invalid analysis JSON format")
         }
-        
+
+        // Try to parse with more lenient approach
+        guard let parsed = try? JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed) as? [String: Any] else {
+            print("❌ Failed to parse JSON object: \(jsonString)")
+            throw LLMError.invalidResponse("Invalid analysis JSON format")
+        }
+
+        // Extract with defaults for missing fields
+        let violation = parsed["violation"] as? Bool ?? false
+        let severityString = parsed["severity"] as? String ?? "low"
+        let explanation = parsed["explanation"] as? String ?? "No explanation provided"
+        let categories = parsed["categories"] as? [String] ?? []
+        let actionString = (parsed["recommendedAction"] as? String ?? "log").lowercased()
+
         let severity = RuleSeverity(rawValue: severityString) ?? .medium
-        let action = RuleAction(rawValue: actionString) ?? .alert
-        
+        let action = RuleAction(rawValue: actionString) ?? .log
+
+        print("✅ Parsed analysis: violation=\(violation), severity=\(severity), action=\(action)")
+
         return AnalysisResult(
             violation: violation,
             severity: severity,
@@ -198,6 +229,34 @@ public class LLMService: LLMServiceProtocol {
             categories: categories,
             recommendedAction: action
         )
+    }
+
+    // Helper to extract JSON from text that may contain extra content
+    private func extractJSON(from text: String) -> String {
+        var cleanText = text
+
+        // Remove markdown code blocks (```json ... ```)
+        if cleanText.contains("```") {
+            cleanText = cleanText
+                .replacingOccurrences(of: "```json", with: "")
+                .replacingOccurrences(of: "```", with: "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
+        // Look for JSON object between { and }
+        if let start = cleanText.firstIndex(of: "{"),
+           let end = cleanText.lastIndex(of: "}") {
+            var jsonText = String(cleanText[start...end])
+
+            // Fix common JSON errors from AI
+            // Replace newlines inside string values with escaped newlines
+            jsonText = jsonText
+                .replacingOccurrences(of: "\n    \"", with: ",\n    \"") // Add missing commas before new fields
+                .replacingOccurrences(of: ".\n    \"", with: ".\",\n    \"") // Add missing quote+comma after strings
+
+            return jsonText
+        }
+        return cleanText
     }
 }
 

@@ -256,7 +256,26 @@ struct EventDetailRow: View {
                     }
                     
                     if let screenshotPath = event.screenshotPath {
-                        DetailRow(label: "Screenshot", value: URL(fileURLWithPath: screenshotPath).lastPathComponent)
+                        HStack {
+                            Text("Screenshot")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .frame(width: 80, alignment: .leading)
+
+                            Button(action: {
+                                NSWorkspace.shared.open(URL(fileURLWithPath: screenshotPath))
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "photo")
+                                        .font(.caption)
+                                    Text("View Screenshot")
+                                        .font(.caption)
+                                }
+                            }
+                            .buttonStyle(.bordered)
+
+                            Spacer()
+                        }
                     }
                 }
                 .padding(.horizontal)

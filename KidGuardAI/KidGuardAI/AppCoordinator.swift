@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 import Combine
 import StoreKit
+import UserNotifications
 import KidGuardCore
 
 @MainActor
@@ -14,38 +15,43 @@ public class AppCoordinator: ObservableObject {
     @Published var alertMessage = ""
     
     private let llmService = LLMService()
-    private let voiceService = VoiceService()
+    public let voiceService = VoiceService()
     private let screenshotService = ScreenshotService()
     private let storageService = StorageService.shared
     private let subscriptionService = SubscriptionService.shared
     private var proxyService: ProxyService?
     
     public init() {
-        // Don't initialize services immediately to avoid permission crashes
         print("AppCoordinator initialized")
         loadData()
+        setupServices()
+        setupNotifications()
     }
-    
+
     private func setupServices() {
         voiceService.delegate = self
         screenshotService.delegate = self
         subscriptionService.delegate = self
-        
+
         // Request necessary permissions
         voiceService.requestAuthorization()
+    }
+
+    private func setupNotifications() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            if granted {
+                print("✅ Notification permission granted")
+            } else if let error = error {
+                print("❌ Notification permission error: \(error)")
+            }
+        }
     }
     
     private func loadData() {
         rules = storageService.loadRules()
-        
-        // Add test rules if none exist
-        if rules.isEmpty {
-            addTestRules()
-        }
-        
         recentEvents = storageService.loadEvents(limit: 50)
         currentSubscription = subscriptionService.currentSubscription
-        
+
         // Load available subscription products
         Task {
             await subscriptionService.loadProducts()
@@ -53,37 +59,7 @@ public class AppCoordinator: ObservableObject {
     }
     
     // MARK: - Rule Management
-    
-    private func addTestRules() {
-        let testRules = [
-            Rule(
-                description: "Block violent content",
-                categories: ["violence", "inappropriate"],
-                actions: [.block, .alert],
-                severity: .high
-            ),
-            Rule(
-                description: "Monitor social media usage",
-                categories: ["social", "communication"],
-                actions: [.log, .alert],
-                severity: .medium
-            ),
-            Rule(
-                description: "Block gambling sites",
-                categories: ["gambling", "money"],
-                actions: [.block],
-                severity: .critical
-            )
-        ]
-        
-        for rule in testRules {
-            storageService.saveRule(rule)
-        }
-        
-        rules = testRules
-        print("Added \(testRules.count) test rules")
-    }
-    
+
     public func addRule(from text: String) async {
         do {
             let rule = try await llmService.parseRule(from: text)
@@ -96,7 +72,7 @@ public class AppCoordinator: ObservableObject {
     
     public func removeRule(_ rule: Rule) {
         rules.removeAll { $0.id == rule.id }
-        // TODO: Remove from Core Data
+        storageService.deleteRule(rule)
     }
     
     public func toggleRule(_ rule: Rule) {
@@ -143,7 +119,7 @@ public class AppCoordinator: ObservableObject {
     public func startMonitoring() {
         isMonitoring = true
         screenshotService.startCapturing()
-        
+
         // Initialize and start proxy service
         if proxyService == nil {
             proxyService = ProxyService(
@@ -151,13 +127,16 @@ public class AppCoordinator: ObservableObject {
                 storageService: storageService,
                 port: 8080
             )
-        }
-        
-        do {
-            try proxyService?.start()
-            print("🌐 Proxy service started on port 8080")
-        } catch {
-            showAlert("Failed to start proxy service: \(error.localizedDescription)")
+
+            do {
+                try proxyService?.start()
+                print("🌐 Proxy service started on port 8080")
+            } catch {
+                print("⚠️ Proxy service error: \(error.localizedDescription)")
+                // Don't show alert for already running proxy
+            }
+        } else {
+            print("🌐 Proxy service already running")
         }
     }
     
@@ -220,8 +199,22 @@ public class AppCoordinator: ObservableObject {
     }
     
     private func showNotification(for event: MonitoringEvent) {
-        // TODO: Implement local notifications
-        showAlert("Rule violation detected: \(event.content ?? "Unknown violation")")
+        let content = UNMutableNotificationContent()
+        content.title = "KidGuard AI - Rule Violation"
+        content.body = event.content ?? "A monitoring rule was violated"
+        content.sound = .default
+
+        let request = UNNotificationRequest(
+            identifier: event.id.uuidString,
+            content: content,
+            trigger: nil // Show immediately
+        )
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Failed to show notification: \(error)")
+            }
+        }
     }
     
     // MARK: - Cleanup
@@ -288,9 +281,15 @@ extension AppCoordinator: ScreenshotServiceDelegate {
 extension AppCoordinator: SubscriptionServiceDelegate {
     public func subscriptionService(_ service: SubscriptionService, didUpdateSubscription subscription: KidGuardCore.Subscription) {
         currentSubscription = subscription
-        
+
         // Update AI model based on subscription
-        // TODO: Switch to premium AI model if subscription.premiumAIEnabled
+        if subscription.premiumAIEnabled {
+            llmService.setModel(name: "mixtral:8x7b-instruct")
+            print("✨ Upgraded to premium AI model")
+        } else {
+            llmService.setModel(name: "mistral:7b-instruct")
+            print("📊 Using standard AI model")
+        }
     }
     
     public func subscriptionService(_ service: SubscriptionService, didFailWithError error: Error) {

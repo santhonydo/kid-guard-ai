@@ -3,7 +3,11 @@ import KidGuardCore
 
 struct DashboardView: View {
     @EnvironmentObject var coordinator: AppCoordinator
-    
+    @State private var ruleText = ""
+    @State private var isSubmitting = false
+    @State private var showCheckmark = false
+    @FocusState private var isTextFieldFocused: Bool
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -57,19 +61,41 @@ struct DashboardView: View {
     }
     
     private var quickActionsSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("Quick Actions")
                 .font(.headline)
-            
-            VStack(spacing: 8) {
-                ActionButton(
-                    title: "Add Rule by Voice",
-                    icon: "mic",
-                    color: .green
-                ) {
-                    coordinator.startVoiceInput()
+
+            // Add Rule Input
+            HStack(spacing: 8) {
+                TextField("Add rule (e.g., 'Block violent content')", text: $ruleText)
+                    .textFieldStyle(PlainTextFieldStyle())
+                    .padding(8)
+                    .background(Color(.textBackgroundColor))
+                    .cornerRadius(6)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(isTextFieldFocused ? Color.blue : Color(.separatorColor), lineWidth: 1)
+                    )
+                    .focused($isTextFieldFocused)
+                    .disabled(isSubmitting)
+                    .onSubmit {
+                        submitRule()
+                    }
+
+                // Add Button
+                Button(action: submitRule) {
+                    AnimatedAddButton(
+                        isSubmitting: isSubmitting,
+                        showCheckmark: showCheckmark
+                    )
                 }
-                
+                .buttonStyle(PlainButtonStyle())
+                .disabled(ruleText.isEmpty || isSubmitting)
+                .frame(width: 32, height: 32)
+            }
+
+            // Other Actions
+            VStack(spacing: 8) {
                 ActionButton(
                     title: "Pause for 1 Hour",
                     icon: "pause",
@@ -77,13 +103,33 @@ struct DashboardView: View {
                 ) {
                     coordinator.pauseMonitoring(for: 3600)
                 }
-                
+
                 ActionButton(
                     title: "View All Activity",
                     icon: "list.bullet",
                     color: .blue
                 ) {
                     // Switch to events tab
+                }
+            }
+        }
+    }
+
+    private func submitRule() {
+        guard !ruleText.isEmpty, !isSubmitting else { return }
+
+        isSubmitting = true
+
+        Task {
+            await coordinator.addRule(from: ruleText)
+
+            await MainActor.run {
+                isSubmitting = false
+                showCheckmark = true
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    showCheckmark = false
+                    ruleText = ""
                 }
             }
         }
