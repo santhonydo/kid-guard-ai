@@ -28,6 +28,10 @@ swift build
 swift build --target KidGuardCore
 swift build --target KidGuardAI
 swift build --target KidGuardAIDaemon
+
+# Xcode development (for SwiftUI app)
+open KidGuardAI/KidGuardAI.xcodeproj
+# Use Cmd+B to build, Cmd+R to run
 ```
 
 ### Testing
@@ -101,9 +105,11 @@ ollama pull mixtral:8x7b-instruct
    - `Utilities/`: Helper functions
 
 2. **KidGuardAI** (Main App)
-   - SwiftUI menu bar application
-   - `Views/`: MenuBarView, DashboardView, RulesView, EventsView, SubscriptionView
-   - `AppCoordinator.swift`: Main app state management
+   - SwiftUI menu bar application (MenuBarExtra style)
+   - `Views/`: MenuBarView, DashboardView, RulesView, EventsView, SubscriptionView, QuickActionsView
+   - `AppCoordinator.swift`: Main app state management with service coordination
+   - `main.swift`: App entry point with KidGuardAIApp struct
+   - No traditional window, runs as menu bar extra with 400x500 popup
 
 3. **KidGuardAIDaemon** (Background Service)
    - Handles monitoring and AI processing
@@ -167,18 +173,21 @@ ollama pull mixtral:8x7b-instruct
 ## Implementation Status
 
 ### ✅ Complete
-- Project structure and build system
+- Project structure and build system (Swift Package Manager + Xcode)
 - Core data models (Rule, MonitoringEvent, Subscription)
 - Service layer (LLM, Voice, Screenshot, Storage, Subscription)
-- SwiftUI interface (all views)
+- SwiftUI interface (all views with menu bar app)
 - Background daemon (basic implementation)
 - Docker/container infrastructure
 - Ollama integration framework
+- Voice rule input with QuickActionsView
+- App coordinator with service delegation
 
 ### 🚧 Partial
-- AI model integration (framework ready, prompt engineering needed)
-- Core Data persistence (service layer complete, schema file needed)
+- AI model integration (framework ready, prompt engineering in progress)
+- Core Data persistence (service layer complete, schema in Resources/)
 - Screenshot analysis (framework ready, integration testing needed)
+- Proxy service integration (basic implementation in AppCoordinator)
 
 ### ⏳ Not Started
 - Network proxy module (Network Extension)
@@ -188,6 +197,19 @@ ollama pull mixtral:8x7b-instruct
 - Installer package (.pkg)
 
 ## Development Notes
+
+### Working Directory
+The project root is `/Users/anthony/Dev/apps/kid_guard_ai/` - ensure all commands run from this directory unless otherwise specified. The KidGuardAI subdirectory contains the Xcode project for the main SwiftUI app.
+
+### Development Approaches
+**Option 1: Xcode (Recommended for UI development)**
+- Open `KidGuardAI/KidGuardAI.xcodeproj` in Xcode
+- Use for SwiftUI interface development and debugging
+- All dependencies managed automatically via Swift Package Manager
+
+**Option 2: Command Line (Swift Package Manager)**
+- Use `swift build`, `swift test`, `swift run` from project root
+- Good for core library development and daemon work
 
 ### Container-First Approach
 The implementation prioritizes Docker development for rapid iteration before full macOS integration. The container provides:
@@ -236,8 +258,9 @@ curl -X POST http://localhost:11434/api/generate \
 ### Adding a New View
 1. Create SwiftUI view in KidGuardAI/Views/
 2. Add @StateObject or @ObservedObject for data binding
-3. Register in MenuBarView tab navigation
+3. Register in MenuBarView tab navigation (Tab enum and switch statement)
 4. Update AppCoordinator if state management needed
+5. Ensure view works within 400x500 menu bar popup constraints
 
 ### Testing Container Changes
 ```bash
