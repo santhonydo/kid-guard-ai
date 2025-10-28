@@ -23,7 +23,7 @@ let package = Package(
             name: "KidGuardAI",
             dependencies: ["KidGuardCore"],
             path: "KidGuardAI",
-            exclude: ["KidGuardAI.xcodeproj"]
+            exclude: ["KidGuardAI.xcodeproj", "KidGuardAIFilterExtension"]
         ),
         .executableTarget(
             name: "KidGuardAIDaemon", 

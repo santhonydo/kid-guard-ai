@@ -28,6 +28,10 @@ public class StorageService: ObservableObject {
         // Add new rule
         rules.append(rule)
         save()
+        
+        // Sync to Network Extension if available
+        syncRulesToNetworkExtension()
+        
         print("Saved rule: \(rule.description)")
     }
     
@@ -39,6 +43,10 @@ public class StorageService: ObservableObject {
     public func deleteRule(_ rule: Rule) {
         rules.removeAll { $0.id == rule.id }
         save()
+        
+        // Sync to Network Extension if available
+        syncRulesToNetworkExtension()
+        
         print("Deleted rule: \(rule.description)")
     }
 
@@ -95,5 +103,25 @@ public class StorageService: ObservableObject {
     private func getDocumentsDirectory() -> URL {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         return paths[0]
+    }
+    
+    // MARK: - Network Extension Integration
+    
+    private func syncRulesToNetworkExtension() {
+        do {
+            try SharedStorage.saveRules(rules)
+            print("StorageService: Synced \(rules.count) rules to Network Extension")
+        } catch {
+            print("StorageService: Failed to sync rules to Network Extension: \(error)")
+        }
+    }
+    
+    public func loadNetworkFilterEvents() -> [NetworkFilterEvent] {
+        do {
+            return try SharedStorage.loadEvents()
+        } catch {
+            print("StorageService: Failed to load network filter events: \(error)")
+            return []
+        }
     }
 }

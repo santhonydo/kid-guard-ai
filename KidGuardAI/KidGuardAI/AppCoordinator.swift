@@ -19,6 +19,7 @@ public class AppCoordinator: ObservableObject {
     private let screenshotService = ScreenshotService()
     private let storageService = StorageService.shared
     private let subscriptionService = SubscriptionService.shared
+    public let filterManager = FilterManager.shared
     private var proxyService: ProxyService?
     
     public init() {
@@ -38,11 +39,20 @@ public class AppCoordinator: ObservableObject {
     }
 
     private func setupNotifications() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if granted {
-                print("✅ Notification permission granted")
-            } else if let error = error {
-                print("❌ Notification permission error: \(error)")
+        // Check if we're running from a proper app bundle
+        guard Bundle.main.bundleURL.pathExtension == "app" else {
+            print("⚠️ Running from development build, skipping notification setup")
+            return
+        }
+        
+        // Safely request notification permissions
+        DispatchQueue.main.async {
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+                if granted {
+                    print("✅ Notification permission granted")
+                } else if let error = error {
+                    print("❌ Notification permission error: \(error)")
+                }
             }
         }
     }
@@ -51,6 +61,9 @@ public class AppCoordinator: ObservableObject {
         rules = storageService.loadRules()
         recentEvents = storageService.loadEvents(limit: 50)
         currentSubscription = subscriptionService.currentSubscription
+
+        // Sync rules to Network Extension
+        RuleSyncService.shared.syncRulesToExtension()
 
         // Load available subscription products
         Task {
@@ -65,6 +78,8 @@ public class AppCoordinator: ObservableObject {
             let rule = try await llmService.parseRule(from: text)
             rules.append(rule)
             storageService.saveRule(rule)
+            // Sync rules to Network Extension
+            RuleSyncService.shared.syncRulesToExtension()
         } catch {
             showAlert("Failed to create rule: \(error.localizedDescription)")
         }
@@ -73,6 +88,8 @@ public class AppCoordinator: ObservableObject {
     public func removeRule(_ rule: Rule) {
         rules.removeAll { $0.id == rule.id }
         storageService.deleteRule(rule)
+        // Sync rules to Network Extension
+        RuleSyncService.shared.syncRulesToExtension()
     }
     
     public func toggleRule(_ rule: Rule) {
@@ -88,6 +105,8 @@ public class AppCoordinator: ObservableObject {
             )
             rules[index] = updatedRule
             storageService.saveRule(updatedRule)
+            // Sync rules to Network Extension
+            RuleSyncService.shared.syncRulesToExtension()
         }
     }
     

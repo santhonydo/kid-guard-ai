@@ -6,13 +6,15 @@ struct MenuBarView: View {
     @State private var selectedTab: Tab = .dashboard
     
     enum Tab: CaseIterable {
-        case dashboard, rules, events, subscription
+        case dashboard, rules, events, network, testmode, subscription
         
         var title: String {
             switch self {
             case .dashboard: return "Dashboard"
             case .rules: return "Rules"
             case .events: return "Activity"
+            case .network: return "Network"
+            case .testmode: return "Test Mode"
             case .subscription: return "Subscription"
             }
         }
@@ -22,6 +24,8 @@ struct MenuBarView: View {
             case .dashboard: return "house"
             case .rules: return "shield"
             case .events: return "clock"
+            case .network: return "network"
+            case .testmode: return "testtube.2"
             case .subscription: return "star"
             }
         }
@@ -97,6 +101,10 @@ struct MenuBarView: View {
                     RulesView()
                 case .events:
                     EventsView()
+                case .network:
+                    NetworkExtensionView()
+                case .testmode:
+                    TestModeView()
                 case .subscription:
                     SubscriptionView()
                 }

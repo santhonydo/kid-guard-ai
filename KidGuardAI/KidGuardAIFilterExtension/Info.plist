@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NEMachServiceName</key>
+	<string>$(TeamIdentifierPrefix)com.kidguardai.KidGuardAI.KidGuardAIFilterExtension</string>
+	<key>NEProviderClasses</key>
+	<dict>
+		<key>com.apple.networkextension.filter-data</key>
+		<string>FilterDataProvider</string>
+	</dict>
+	<key>NetworkExtension</key>
+	<dict>
+		<key>NEProviderClasses</key>
+		<dict>
+			<key>com.apple.networkextension.filter-data</key>
+			<string>FilterDataProvider</string>
+		</dict>
+	</dict>
+	<key>NSSystemExtensionUsageDescription</key>
+	<string>KidGuard AI needs to filter network traffic to protect children from harmful content.</string>
+	<key>CFBundleDisplayName</key>
+	<string>KidGuardAIFilterExtension</string>
+	<key>CFBundleName</key>
+	<string>com.kidguardai.KidGuardAI.KidGuardAIFilterExtension</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundlePackageType</key>
+	<string>SYSX</string>
+	<key>CFBundleSupportedPlatforms</key>
+	<array>
+		<string>MacOSX</string>
+	</array>
+	<key>LSMinimumSystemVersion</key>
+	<string>13.0</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.kidguardai.KidGuardAI.KidGuardAIFilterExtension</string>
+	<key>CFBundleExecutable</key>
+	<string>com.kidguardai.KidGuardAI.KidGuardAIFilterExtension</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>NEExtensionPointIdentifier</key>
+	<string>com.apple.networkextension.filter-data</string>
+</dict>
+</plist>

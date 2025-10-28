@@ -7,10 +7,68 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		92334DFF2EA8832400357748 /* KidGuardCore in Frameworks */ = {isa = PBXBuildFile; productRef = 92334DFE2EA8832400357748 /* KidGuardCore */; };
+		924845072EAFC877000843FC /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 922C46BB2EAC088A0010D2D1 /* NetworkExtension.framework */; };
+		924845112EAFC877000843FC /* com.kidguardai.KidGuardAI.KidGuardAIFilterExtension.systemextension in Embed System Extensions */ = {isa = PBXBuildFile; fileRef = 924845062EAFC877000843FC /* com.kidguardai.KidGuardAI.KidGuardAIFilterExtension.systemextension */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		9248451A2EAFCED6000843FC /* KidGuardCore in Frameworks */ = {isa = PBXBuildFile; productRef = 924845192EAFCED6000843FC /* KidGuardCore */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		9248450F2EAFC877000843FC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 92B359272EA7759B00FA3A5E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 924845052EAFC877000843FC;
+			remoteInfo = KidGuardAIFilterExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		922C46C92EAC088B0010D2D1 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		924843152EACA505000843FC /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9248433C2EAF46B5000843FC /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(PLUGINS_FOLDER_PATH)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		924845162EAFC877000843FC /* Embed System Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(SYSTEM_EXTENSIONS_FOLDER_PATH)";
+			dstSubfolderSpec = 16;
+			files = (
+				924845112EAFC877000843FC /* com.kidguardai.KidGuardAI.KidGuardAIFilterExtension.systemextension in Embed System Extensions */,
+			);
+			name = "Embed System Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		922C46BB2EAC088A0010D2D1 /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
+		924845062EAFC877000843FC /* com.kidguardai.KidGuardAI.KidGuardAIFilterExtension.systemextension */ = {isa = PBXFileReference; explicitFileType = "wrapper.system-extension"; includeInIndex = 0; path = com.kidguardai.KidGuardAI.KidGuardAIFilterExtension.systemextension; sourceTree = BUILT_PRODUCTS_DIR; };
 		92B3592F2EA7759B00FA3A5E /* KidGuardAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KidGuardAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -22,9 +80,39 @@
 			);
 			target = 92B3592E2EA7759B00FA3A5E /* KidGuardAI */;
 		};
+		924845152EAFC877000843FC /* Exceptions for "KidGuardAIFilterExtension" folder in "KidGuardAIFilterExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 924845052EAFC877000843FC /* KidGuardAIFilterExtension */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		922C46BD2EAC088B0010D2D1 /* KidGuardAIFilterExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = KidGuardAIFilterExtension;
+			sourceTree = "<group>";
+		};
+		924843092EACA505000843FC /* KidGuardCore */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = KidGuardCore;
+			sourceTree = "<group>";
+		};
+		9248432E2EAF46B5000843FC /* KidGuardAIFilterExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = KidGuardAIFilterExtension;
+			sourceTree = "<group>";
+		};
+		924845082EAFC877000843FC /* KidGuardAIFilterExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				924845152EAFC877000843FC /* Exceptions for "KidGuardAIFilterExtension" folder in "KidGuardAIFilterExtension" target */,
+			);
+			path = KidGuardAIFilterExtension;
+			sourceTree = "<group>";
+		};
 		92B359312EA7759B00FA3A5E /* KidGuardAI */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -36,21 +124,42 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		924845032EAFC877000843FC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				924845072EAFC877000843FC /* NetworkExtension.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		92B3592C2EA7759B00FA3A5E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				92334DFF2EA8832400357748 /* KidGuardCore in Frameworks */,
+				9248451A2EAFCED6000843FC /* KidGuardCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		922C46BA2EAC088A0010D2D1 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				922C46BB2EAC088A0010D2D1 /* NetworkExtension.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		92B359262EA7759B00FA3A5E = {
 			isa = PBXGroup;
 			children = (
 				92B359312EA7759B00FA3A5E /* KidGuardAI */,
+				922C46BD2EAC088B0010D2D1 /* KidGuardAIFilterExtension */,
+				924843092EACA505000843FC /* KidGuardCore */,
+				9248432E2EAF46B5000843FC /* KidGuardAIFilterExtension */,
+				924845082EAFC877000843FC /* KidGuardAIFilterExtension */,
+				922C46BA2EAC088A0010D2D1 /* Frameworks */,
 				92B359302EA7759B00FA3A5E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -59,6 +168,7 @@
 			isa = PBXGroup;
 			children = (
 				92B3592F2EA7759B00FA3A5E /* KidGuardAI.app */,
+				924845062EAFC877000843FC /* com.kidguardai.KidGuardAI.KidGuardAIFilterExtension.systemextension */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -66,6 +176,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		924845052EAFC877000843FC /* KidGuardAIFilterExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 924845122EAFC877000843FC /* Build configuration list for PBXNativeTarget "KidGuardAIFilterExtension" */;
+			buildPhases = (
+				924845022EAFC877000843FC /* Sources */,
+				924845032EAFC877000843FC /* Frameworks */,
+				924845042EAFC877000843FC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				924845082EAFC877000843FC /* KidGuardAIFilterExtension */,
+			);
+			name = KidGuardAIFilterExtension;
+			packageProductDependencies = (
+			);
+			productName = KidGuardAIFilterExtension;
+			productReference = 924845062EAFC877000843FC /* com.kidguardai.KidGuardAI.KidGuardAIFilterExtension.systemextension */;
+			productType = "com.apple.product-type.system-extension";
+		};
 		92B3592E2EA7759B00FA3A5E /* KidGuardAI */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 92B3593F2EA7759C00FA3A5E /* Build configuration list for PBXNativeTarget "KidGuardAI" */;
@@ -73,17 +205,22 @@
 				92B3592B2EA7759B00FA3A5E /* Sources */,
 				92B3592C2EA7759B00FA3A5E /* Frameworks */,
 				92B3592D2EA7759B00FA3A5E /* Resources */,
+				922C46C92EAC088B0010D2D1 /* Embed Foundation Extensions */,
+				924843152EACA505000843FC /* Embed Frameworks */,
+				9248433C2EAF46B5000843FC /* Embed App Extensions */,
+				924845162EAFC877000843FC /* Embed System Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				924845102EAFC877000843FC /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				92B359312EA7759B00FA3A5E /* KidGuardAI */,
 			);
 			name = KidGuardAI;
 			packageProductDependencies = (
-				92334DFE2EA8832400357748 /* KidGuardCore */,
+				924845192EAFCED6000843FC /* KidGuardCore */,
 			);
 			productName = KidGuardAI;
 			productReference = 92B3592F2EA7759B00FA3A5E /* KidGuardAI.app */;
@@ -99,6 +236,9 @@
 				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
+					924845052EAFC877000843FC = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
 					92B3592E2EA7759B00FA3A5E = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
@@ -114,7 +254,7 @@
 			mainGroup = 92B359262EA7759B00FA3A5E;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				92334DFD2EA8832400357748 /* XCLocalSwiftPackageReference "../../kid_guard_ai" */,
+				924843162EACA798000843FC /* XCLocalSwiftPackageReference "../../kid_guard_ai" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 92B359302EA7759B00FA3A5E /* Products */;
@@ -122,11 +262,19 @@
 			projectRoot = "";
 			targets = (
 				92B3592E2EA7759B00FA3A5E /* KidGuardAI */,
+				924845052EAFC877000843FC /* KidGuardAIFilterExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		924845042EAFC877000843FC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		92B3592D2EA7759B00FA3A5E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,6 +285,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		924845022EAFC877000843FC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		92B3592B2EA7759B00FA3A5E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -146,7 +301,87 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		924845102EAFC877000843FC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 924845052EAFC877000843FC /* KidGuardAIFilterExtension */;
+			targetProxy = 9248450F2EAFC877000843FC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		924845132EAFC877000843FC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = KidGuardAIFilterExtension/KidGuardAIFilterExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = HP59EHJS3Z;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KidGuardAIFilterExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = KidGuardAIFilterExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kidguardai.KidGuardAI.KidGuardAIFilterExtension;
+				PRODUCT_NAME = "$(inherited)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "MacOS App Dev KidGuardAIFilterExtension";
+				REGISTER_APP_GROUPS = YES;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		924845142EAFC877000843FC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = KidGuardAIFilterExtension/KidGuardAIFilterExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = HP59EHJS3Z;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KidGuardAIFilterExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = KidGuardAIFilterExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kidguardai.KidGuardAI.KidGuardAIFilterExtension;
+				PRODUCT_NAME = "$(inherited)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "MacOS App Dev KidGuardAIFilterExtension";
+				REGISTER_APP_GROUPS = YES;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		92B3593D2EA7759C00FA3A5E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -272,24 +507,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = KidGuardAI/KidGuardAI.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = HP59EHJS3Z;
-				ENABLE_APP_SANDBOX = YES;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = HP59EHJS3Z;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
-				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
-				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
-				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
-				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
-				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
-				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
-				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
-				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
-				ENABLE_RESOURCE_ACCESS_USB = NO;
-				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = KidGuardAI/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "KidGuard AI needs camera access for screenshot monitoring";
@@ -303,6 +531,8 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kidguardai.KidGuardAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "macOS App Dev com.kidguardai.KidGuardAI";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -318,24 +548,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = KidGuardAI/KidGuardAI.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = HP59EHJS3Z;
-				ENABLE_APP_SANDBOX = YES;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = HP59EHJS3Z;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
-				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
-				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
-				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
-				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
-				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
-				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
-				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
-				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
-				ENABLE_RESOURCE_ACCESS_USB = NO;
-				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = KidGuardAI/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "KidGuard AI needs camera access for screenshot monitoring";
@@ -349,6 +572,8 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kidguardai.KidGuardAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "macOS App Dev com.kidguardai.KidGuardAI";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -362,6 +587,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		924845122EAFC877000843FC /* Build configuration list for PBXNativeTarget "KidGuardAIFilterExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				924845132EAFC877000843FC /* Debug */,
+				924845142EAFC877000843FC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		92B3592A2EA7759B00FA3A5E /* Build configuration list for PBXProject "KidGuardAI" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -383,15 +617,16 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		92334DFD2EA8832400357748 /* XCLocalSwiftPackageReference "../../kid_guard_ai" */ = {
+		924843162EACA798000843FC /* XCLocalSwiftPackageReference "../../kid_guard_ai" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../kid_guard_ai;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		92334DFE2EA8832400357748 /* KidGuardCore */ = {
+		924845192EAFCED6000843FC /* KidGuardCore */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 924843162EACA798000843FC /* XCLocalSwiftPackageReference "../../kid_guard_ai" */;
 			productName = KidGuardCore;
 		};
 /* End XCSwiftPackageProductDependency section */

@@ -4,5 +4,7 @@
 <dict>
 	<key>NSUserNotificationUsageDescription</key>
 	<string>KidGuard AI needs notification permission to alert you about rule violations</string>
+	<key>NSSystemExtensionUsageDescription</key>
+	<string>KidGuard AI needs to filter network traffic to protect children from harmful content.</string>
 </dict>
 </plist>
